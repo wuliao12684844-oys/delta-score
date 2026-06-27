@@ -31,8 +31,8 @@
         .input-group { display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; }
         .input-header { display: flex; justify-content: space-between; font-size: 0.85rem; color: #cbd5e1; }
         .input-val-display { color: var(--accent-orange); font-weight: bold; font-family: monospace; }
-        .input-control-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .btn-group { display: flex; gap: 4px; flex-grow: 1; }
+        .input-control-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; } /* 确保在小屏幕下强制不换行 */
+        .btn-group { display: flex; gap: 4px; flex-grow: 1; min-width: 120px; }
         .calc-btn { background: #1e2936; color: #fff; border: 1px solid #2d3d52; padding: 6px 0; font-size: 0.8rem; border-radius: 4px; cursor: pointer; flex: 1; font-weight: bold; }
         .calc-btn:hover { background: #273549; border-color: #3b82f6; }
         
@@ -41,7 +41,7 @@
             background-color: var(--bg-color); 
             border: 1px solid var(--border-color); 
             color: #fff; 
-            width: 80px; 
+            width: 75px; 
             text-align: center; 
             font-size: 0.9rem; 
             padding: 5px 0; 
@@ -49,6 +49,7 @@
             outline: none; 
             font-weight: bold;
             transition: all 0.2s ease-in-out;
+            flex-shrink: 0; /* 防止框被无情压缩 */
         }
         .number-box:focus {
             border-color: var(--accent-orange);
@@ -258,8 +259,11 @@
         document.getElementById('bar_battle').style.width = `${Math.min(100, (score_battle / 350) * 100)}%`;
         document.getElementById('kill_efficiency').innerText = Math.round(score_battle / 8);
 
-        // 烽火地带计算
-        const score_hazard = (((meat + armor) / 10) * ((ads + hip + mobility) / 100) * recoil * (1 + (range / 100))) + ((rpm / 10) * (r_cap / (r_cap + 30)) * (velocity / 100));
+        // 烽火地带计算 - 添加除以零安全防护 (r_cap + 30 为 0 时防止产生 NaN)
+        const capDenominator = r_cap + 30;
+        const capFactor = capDenominator === 0 ? 0 : (r_cap / capDenominator);
+        
+        const score_hazard = (((meat + armor) / 10) * ((ads + hip + mobility) / 100) * recoil * (1 + (range / 100))) + ((rpm / 10) * capFactor * (velocity / 100));
         document.getElementById('score_hazard').innerText = score_hazard.toFixed(1);
         document.getElementById('bar_hazard').style.width = `${Math.min(100, (score_hazard / 1600) * 100)}%`;
 
